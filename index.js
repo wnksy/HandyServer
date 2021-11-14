@@ -173,12 +173,17 @@ io.on('connection', (socket) => {
     });
 });
 
+app.get('/:connectionKey/getServerTime', (req, res) => {
+    res.json({ serverTime: getServerTime() });
+});
 app.get('/:connectionKey/getVersion', (req, res) => {
     if (client == null)
         return sendJsonNotConnectedResponse(res);
 
     ioSendCommand(client, 'getVersion', {}, (ioRes) => {
         if (ioRes != null) {
+            // Pretend current version is also the latest version
+            ioRes.latest = ioRes.version;
             sendJsonResponse(res, ioRes);
         } else {
             sendJsonTimeoutResponse(res);
@@ -275,11 +280,8 @@ app.get('/:connectionKey/syncPrepare', (req, res) => {
 });
 app.get('/:connectionKey/syncPlay', (req, res) => {
     const play = req.query.play;
-    let serverTime = req.query.serverTime || getServerTime();
-    if (typeof(serverTime) != 'number')
-        return res.sendStatus(400);
-    serverTime = ''+serverTime; // Must be sent as a string
-    const time = req.query.time || 0;
+    const serverTime = req.query.serverTime || (''+getServerTime()); // Must be sent as a string
+    const time = req.query.time || '0';
     if (play == undefined)
         return res.sendStatus(400);
     if (client == null)
@@ -301,6 +303,23 @@ app.get('/:connectionKey/syncOffset', (req, res) => {
         return sendJsonNotConnectedResponse(res);
 
     ioSendCommand(client, 'syncOffset', { offset }, (ioRes) => {
+        if (ioRes != null) {
+            sendJsonResponse(res, ioRes);
+        } else {
+            sendJsonTimeoutResponse(res);
+        }
+    });
+});
+app.get('/:connectionKey/syncAdjustTimestamp', (req, res) => {
+    const currentTime = req.query.currentTime;
+    const serverTime = req.query.serverTime;
+    const filter = req.query.filter;
+    if (currentTime == undefined || serverTime == undefined)
+        return res.sendStatus(400);
+    if (client == null)
+        return sendJsonNotConnectedResponse(res);
+
+    ioSendCommand(client, 'syncAdjustTimestamp', { currentTime, serverTime, filter }, (ioRes) => {
         if (ioRes != null) {
             sendJsonResponse(res, ioRes);
         } else {
