@@ -11,7 +11,7 @@ HandyServer allows applications to control a Handy masturbator completely offlin
 
 The server listens on port:
 - 443 (HTTPS) for the Handy connection
-- 80 (HTTP) for control by applications via API v1 (see *Limitations and risks*)
+- 81 (HTTP) for control by applications via API v1 (see *Limitations and risks*)
 
 
 # Requirements
@@ -31,7 +31,7 @@ The server listens on port:
 
 1. Configure your local DNS server so that `www.handyfeeling.com` is resolved to the IP address of the computer running HandyServer.
 2. Run `node index.js` (on some operating systems you will need extra configuration to allow listening on ports <1000)
-3. Configure the controlling application to use HandyServer by entering the API URL `http://localhost/` or whatever appropriate, depending where you are running HandyServer.
+3. Configure the controlling application to use HandyServer by entering the API URL `http://localhost:81/` or whatever appropriate, depending where you are running HandyServer.
 
 
 # FAQs
